@@ -4650,9 +4650,15 @@ const techs = {
             if (payCosts($(this)[0])){
                 global.settings.arpa.genetics = true;
                 if (!global.arpa['sequence']){
+                    var progressStart = 0;            
+                    if (global.stats.feat['god']){
+                        let rank = checkGod();
+                        progressStart += rank * 10000;
+                    }
+                    
                     global.arpa['sequence'] = {
                         max: 50000,
-                        progress: 0,
+                        progress: progressStart,
                         time: 50000,
                         on: global.race['cataclysm'] || global.race['orbit_decayed'] ? false : true,
                         boost: false,
