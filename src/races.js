@@ -7056,12 +7056,10 @@ export function traitCostMod(t,val){
         case 'stubborn':
         {
             val *= 1 + (traits.stubborn.vars()[0] / 100);
-            break;
         }
         case 'untrustworthy':
         {
             val *= 1 + (traits.untrustworthy.vars()[0] / 100);
-            break;
         }
     }
     return Math.round(val);
