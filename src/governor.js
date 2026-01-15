@@ -613,7 +613,11 @@ export function drawnGovernOffice(){
         if (!global.race.governor.config.hasOwnProperty('trash')){
             global.race.governor.config['trash'] = {};
         }
-        ['Infernite','Elerium','Copper','Iron'].forEach(function(res){
+        let thrownRes = ['Infernite', 'Elerium', 'Copper'];
+        if (!global.race['iron_allergy'])
+            thrownRes.push('Iron');
+
+        thrownRes.forEach(function(res){
             if (!global.race.governor.config.trash.hasOwnProperty(res) || typeof global.race.governor.config.trash[res] !== 'object' || global.race.governor.config.trash[res] === null){
                 global.race.governor.config.trash[res] = { v: 0, s: true };
             }
@@ -629,7 +633,7 @@ export function drawnGovernOffice(){
         let trash = $(`<div class="storage"></div>`);
         contain.append(trash);
 
-        ['Infernite','Elerium','Copper','Iron'].forEach(function(res){
+        thrownRes.forEach(function(res){
             trash.append($(`<b-field class="trash"><div class="trashButton" role="button" @click="trashStrat('${res}')" v-html="$options.methods.trashLabel('${res}')"></div><b-numberinput min="0" :max="1000000" v-model="c.trash.${res}.v" :controls="false"></b-numberinput></b-field>`));
         });
     }

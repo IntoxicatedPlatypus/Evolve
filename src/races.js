@@ -983,7 +983,7 @@ export const traits = {
             }
         },
     },
-    iron_allergy: { // Iron mining reduced
+    iron_allergy: { // Wrought iron (Annealed copper) costs increased. Iron costs converted to Copper/Steel
         name: loc('trait_iron_allergy_name'),
         desc: loc('trait_iron_allergy'),
         type: 'genus',
@@ -993,19 +993,19 @@ export const traits = {
         vars(r){
             switch (r || traitRank('iron_allergy') || 1){
                 case 0.1:
-                    return [45];
+                    return [120, 85];
                 case 0.25:
-                    return [40];
+                    return [90, 80];
                 case 0.5:
-                    return [35];
+                    return [60, 75];
                 case 1:
-                    return [25];
+                    return [30, 70];
                 case 2:
-                    return [18];
+                    return [15, 60];
                 case 3:
-                    return [15];
+                    return [10, 50];
                 case 4:
-                    return [12];
+                    return [5, 40];
             }
         },
     },

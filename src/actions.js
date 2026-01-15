@@ -976,7 +976,7 @@ export const actions = {
                             }
                         });
                     }
-                    
+
                     if (date.getMonth() !== 11 || (date.getMonth() === 11 && (date.getDate() <= 16 || date.getDate() >= 25))){
                         if (active_gift === `g2019`){
                             if (global['special'] && global.special['gift']){
@@ -997,12 +997,12 @@ export const actions = {
                         else {
                             if (global['special'] && global.special['gift']){
                                 delete global.special.gift[active_gift];
-                                
+
                                 let resets = global.stats.hasOwnProperty('reset') ? global.stats.reset : 0;
                                 let mad = global.stats.hasOwnProperty('mad') ? global.stats.mad : 0;
                                 let bioseed = global.stats.hasOwnProperty('bioseed') ? global.stats.bioseed : 0;
                                 let cataclysm = global.stats.hasOwnProperty('cataclysm') ? global.stats.cataclysm : 0;
-        
+
                                 let plasmid = 100 + resets + mad;
                                 let phage = bioseed + cataclysm;
                                 let gift = [];
@@ -1028,7 +1028,7 @@ export const actions = {
                                     global.stats.phage += phage;
                                     gift.push(`${phage.toLocaleString()} ${loc(`resource_Phage_name`)}`);
                                 }
-        
+
                                 if (global.stats.hasOwnProperty('achieve')){
                                     let universe = global.stats.achieve['whitehole'] ? global.stats.achieve['whitehole'].l : 0;
                                     universe += global.stats.achieve['heavy'] ? global.stats.achieve['heavy'].l : 0;
@@ -1036,15 +1036,15 @@ export const actions = {
                                     universe += global.stats.achieve['eviltwin'] ? global.stats.achieve['eviltwin'].l : 0;
                                     universe += global.stats.achieve['microbang'] ? global.stats.achieve['microbang'].l : 0;
                                     universe += global.stats.achieve['pw_apocalypse'] ? global.stats.achieve['pw_apocalypse'].l : 0;
-        
+
                                     let ascended = global.stats.achieve['ascended'] ? global.stats.achieve['ascended'].l : 0;
                                     let descend = global.stats.achieve['corrupted'] ? global.stats.achieve['corrupted'].l : 0;
                                     let ai = global.stats.achieve['obsolete'] ? global.stats.achieve['obsolete'].l : 0;
-        
+
                                     if (universe > 30){ universe = 30; }
                                     if (ascended > 5){ ascended = 5; }
                                     if (descend > 5){ descend = 5; }
-                                    
+
                                     if (universe > 0){
                                         let dark = +(universe / 7.5).toFixed(2);
                                         global.prestige.Dark.count += dark;
@@ -1207,7 +1207,7 @@ export const actions = {
                 }
                 else {
                     return loc(`city_gather`,[global.resource.Stone.name]);
-                }                
+                }
             },
             desc(){
                 let gain = $(this)[0].val(false);
@@ -1216,7 +1216,7 @@ export const actions = {
                 }
                 else {
                     return loc(global.race['sappy'] ? 'city_amber_desc' : 'city_stone_desc',[gain,global.resource.Stone.name]);
-                }                
+                }
             },
             category: 'outskirts',
             reqs: { primitive: 2 },
@@ -1258,7 +1258,7 @@ export const actions = {
                 }
                 else {
                     return loc(`city_gather`,[global.resource.Chrysotile.name]);
-                }                
+                }
             },
             desc(){
                 let gain = $(this)[0].val(false);
@@ -1267,7 +1267,7 @@ export const actions = {
                 }
                 else {
                     return loc('city_stone_desc',[gain,global.resource.Chrysotile.name]);
-                }                
+                }
             },
             category: 'outskirts',
             reqs: { primitive: 2 },
@@ -2752,7 +2752,10 @@ export const actions = {
                         global.resource.Plywood.display = true;
                     }
                     global.resource.Brick.display = true;
-                    if (global.resource.Iron.display){
+                    if (!global.race['iron_allergy'] && global.resource.Iron.display){
+                        global.resource.Wrought_Iron.display = true;
+                    }
+                    if (global.race['iron_allergy'] && global.resource.Copper.display){
                         global.resource.Wrought_Iron.display = true;
                     }
                     if (global.resource.Aluminium.display){
@@ -2843,7 +2846,7 @@ export const actions = {
         smelter: {
             id: 'city-smelter',
             title: loc('city_smelter'),
-            desc: loc('city_smelter_desc'),
+            desc: global.race['iron_allergy'] ? loc('city_smelter_allergy_desc') : loc('city_smelter_desc'),
             category: 'industrial',
             reqs: { smelting: 1 },
             not_trait: ['cataclysm','lone_survivor'],
@@ -2857,10 +2860,16 @@ export const actions = {
                     iron_yield *= 0.9;
                 }
                 if (global.tech['smelting'] >= 2 && !global.race['steelen']){
-                    return loc('city_smelter_effect2',[iron_yield]);
+                    if (global.race['iron_allergy'])
+                        return loc('city_smelter_allergy_effect2',[iron_yield]);
+                    else
+                        return loc('city_smelter_effect2',[iron_yield]);
                 }
                 else {
-                    return loc('city_smelter_effect1',[iron_yield]);
+                    if (global.race['iron_allergy'])
+                        return loc('city_smelter_allergy_effect1',[iron_yield]);
+                    else
+                        return loc('city_smelter_effect1',[iron_yield]);
                 }
             },
             special: true,
@@ -2877,7 +2886,11 @@ export const actions = {
                     else if ((global.race['kindling_kindred'] || global.race['smoldering']) && !global.race['evil']) {
                         fuel = 'Coal';
                     }
-                    addSmelter($(this)[0].smelting(), 'Iron', fuel);
+                    if (global.race['iron_allergy'])
+                        addSmelter($(this)[0].smelting(), 'Copper', fuel);
+                    else
+                        addSmelter($(this)[0].smelting(), 'Iron', fuel);
+
                     if (global.city.smelter.count === 1){
                         global.settings.showIndustry = true;
                         defineIndustry();
@@ -2898,13 +2911,15 @@ export const actions = {
                         StarCap: 0,
                         Inferno: 0,
                         Iron: 0,
+                        Copper: 0,
                         Steel: 0,
                         Iridium: 0
                     },
                     p: ['smelter','city']
                 };
             },
-            flair: `<div>${loc('city_smelter_flair1')}<div></div>${loc('city_smelter_flair2')}</div>`
+            flair: global.race['iron_allergy'] ? `<div>${loc('city_smelter_allergy_flair1')}<div></div>${loc('city_smelter_allergy_flair2')}</div>` :
+                                                 `<div>${loc('city_smelter_flair1')}<div></div>${loc('city_smelter_flair2')}</div>`
         },
         metal_refinery: {
             id: 'city-metal_refinery',
@@ -3517,7 +3532,7 @@ export const actions = {
                         }
                     })() * (global.race['artifical'] ? 0.25 : 1);
                 },
-                Brick(offset){ 
+                Brick(offset){
                     const level = (offset ? offset : 0) + (global.city['banquet'] ? global.city['banquet'].level : 0);
                     switch (level){
                         case 0:
@@ -4678,7 +4693,7 @@ export function buildTemplate(key, region){
                             case 0.25:
                                 buffer = 5;
                                 break;
-                            case 0.5:   
+                            case 0.5:
                                 buffer = 4;
                                 break;
                             case 1:
@@ -4704,7 +4719,7 @@ export function buildTemplate(key, region){
                             case 0.25:
                                 buffer = 5;
                                 break;
-                            case 0.5:   
+                            case 0.5:
                                 buffer = 4;
                                 break;
                             case 1:
@@ -4856,11 +4871,24 @@ export function buildTemplate(key, region){
                     Copper(offset){
                         let shoes = (global.race['shoecnt'] || 0) + (offset || 0);
                         let lum = (global.race['kindling_kindred'] || global.race['smoldering']) ? false : true;
-                        let active = (!lum || (lum && shoes > 12 && global.resource.Copper.display))
-                            && (!global.resource.Iron.display || shoes <= 75) ? true : false;
-                        return active ? Math.round((shoes > 75 ? 20 : 5) * (shoes <= 12 ? 1 : shoes - 11) * (traits.hooved.vars()[0] / 100)) : 0;
+
+                        if (global.race['iron_allergy']) {
+                            let active = (!lum || (lum && shoes > 12 && global.resource.Copper.display))
+                                && (!global.resource.Steel.display || shoes <= 150);
+
+                            return active ? Math.round((shoes > 150 ? 20 : 5) * (shoes <= 12 ? 1 : shoes - 11) * (traits.hooved.vars()[0] / 100)) : 0;
+                        }
+                        else {
+                            let active = (!lum || (lum && shoes > 12 && global.resource.Copper.display))
+                                && (!global.resource.Iron.display || shoes <= 75);
+
+                            return active ? Math.round((shoes > 75 ? 20 : 5) * (shoes <= 12 ? 1 : shoes - 11) * (traits.hooved.vars()[0] / 100)) : 0;
+                        }
                     },
                     Iron(offset){
+                        if (global.race['iron_allergy'])
+                            return 0;
+
                         let shoes = (global.race['shoecnt'] || 0) + (offset || 0);
                         return global.resource.Iron.display && shoes > 75 && (!global.resource.Steel.display || shoes <= 150) ? Math.round((shoes <= 150 ? 12 : 28) * shoes * (traits.hooved.vars()[0] / 100)) : 0;
                     },
@@ -4899,7 +4927,7 @@ export function buildTemplate(key, region){
             };
             return tKey(action,tName,region);
         }
-        case 's_alter':   
+        case 's_alter':
         {
             let action = {
                 id: `${region}-s_alter`,
@@ -5032,7 +5060,7 @@ export function buildTemplate(key, region){
                     let metal = getShrineBonus('metal');
                     let know = getShrineBonus('know');
                     let tax = getShrineBonus('tax');
-    
+
                     let desc = `<div class="has-text-special">${loc('city_shrine_effect')}</div>`;
                     if (global.city['shrine'] && morale.active){
                         desc = desc + `<div>${loc('city_shrine_morale',[+(morale.add).toFixed(1)])}</div>`;
@@ -5176,12 +5204,12 @@ raceList.forEach(function(race){
                 typeList.forEach(function(t){
                     if (global.tech[`evo_${t}`] >= 2){ typeCheck = true; }
                 });
-                 
-                return (global.race.seeded 
-                    || (global.stats.achieve['mass_extinction'] && global.stats.achieve['mass_extinction'].l >= 1) 
+
+                return (global.race.seeded
+                    || (global.stats.achieve['mass_extinction'] && global.stats.achieve['mass_extinction'].l >= 1)
                     || (global.stats.achieve[`extinct_${race}`] && global.stats.achieve[`extinct_${race}`].l >= 1))
-                    && typeCheck 
-                    && global.evolution.final === 100 && !global.race['evoFinalMenu']; 
+                    && typeCheck
+                    && global.evolution.final === 100 && !global.race['evoFinalMenu'];
             },
             cost: {
                 RNA(){ return 320; },
@@ -5240,7 +5268,7 @@ if (Object.keys(global.stats.synth).length > 1){
         queue_complete(){ return global.tech['evo'] && global.tech.evo === 8 ? 1 : 0; }
     });
 }
-            
+
 const challengeList = {
     'plasmid': 'no_plasmid',
     'mastery': 'weak_mastery',
@@ -5437,7 +5465,7 @@ function challengeEffect(c){
             }
             else {
                 return `<div>${loc('evo_challenge_cataclysm_effect')}</div><div class="has-text-danger">${loc('evo_challenge_scenario_warn')}</div>`;
-            }   
+            }
         }
         case 'gravity_well':
         {
@@ -6422,8 +6450,8 @@ export function setAction(c_action,action,type,old,prediction){
             p_off(p,id){
                 let value = global[action][type].count - p;
                 if (
-                    (id === 'city-casino' && !global.race['cataclysm'] && !global.race['orbit_decayed']) || 
-                    (id === 'space-spc_casino' && (global.race['cataclysm'] || global.race['orbit_decayed'])) || 
+                    (id === 'city-casino' && !global.race['cataclysm'] && !global.race['orbit_decayed']) ||
+                    (id === 'space-spc_casino' && (global.race['cataclysm'] || global.race['orbit_decayed'])) ||
                     (id === 'tauceti-tauceti_casino' && global.tech['isolation']) ||
                     (id === 'portal-hell_casino' && global.race['warlord'])
                 ){
@@ -6436,7 +6464,7 @@ export function setAction(c_action,action,type,old,prediction){
             },
             p_on(p,id){
                 if (
-                    (id === 'city-biolab' && !global.race['cataclysm'] && !global.race['orbit_decayed']) || 
+                    (id === 'city-biolab' && !global.race['cataclysm'] && !global.race['orbit_decayed']) ||
                     ((global.race['cataclysm'] || global.race['orbit_decayed']) && id === 'space-exotic_lab') ||
                     (global.tech['isolation'] && id === 'tauceti-infectious_disease_lab') ||
                     (global.race['warlord'] && id === 'portal-twisted_lab')
@@ -7253,7 +7281,7 @@ export function actionDesc(parent,c_action,obj,old,action,a_type,bres){
     clearElement(parent);
     var desc = typeof c_action.desc === 'string' ? c_action.desc : c_action.desc();
     bres = bres || false;
-    
+
     let touch = false;
     if (action && a_type && 'ontouchstart' in document.documentElement && navigator.userAgent.match(/Mobi/) && global.settings.touch ? true : false){
         touch = $(`<a id="touchButton" class="button is-dark touchButton">${c_action.hasOwnProperty('touchlabel') ? c_action.touchlabel : loc('construct')}</a>`);
@@ -7602,7 +7630,7 @@ export function templeCount(zig){
         return count;
     }
     return 0;
-} 
+}
 
 function checkMaxCosts(costs){
     var test = true;
@@ -8294,18 +8322,18 @@ export function updateQueueNames(both, items){
                 if (deepScan.includes(currItem.action)){
                     let scan = true; Object.keys(actions[currItem.action]).forEach(function (region){
                         if (actions[currItem.action][region][currItem.type] && scan){
-                            global.queue.queue[i].label = 
-                                typeof actions[currItem.action][region][currItem.type].title === 'string' ? 
-                                actions[currItem.action][region][currItem.type].title : 
+                            global.queue.queue[i].label =
+                                typeof actions[currItem.action][region][currItem.type].title === 'string' ?
+                                actions[currItem.action][region][currItem.type].title :
                                 actions[currItem.action][region][currItem.type].title();
                             scan = false;
                         }
                     });
                 }
                 else if (actions[currItem.action]?.[currItem.type]){
-                    global.queue.queue[i].label = 
-                        typeof actions[currItem.action][currItem.type].title === 'string' ? 
-                        actions[currItem.action][currItem.type].title : 
+                    global.queue.queue[i].label =
+                        typeof actions[currItem.action][currItem.type].title === 'string' ?
+                        actions[currItem.action][currItem.type].title :
                         actions[currItem.action][currItem.type].title();
                 }
             }
@@ -8313,9 +8341,9 @@ export function updateQueueNames(both, items){
     }
     if (both && global.tech['r_queue'] && global.r_queue.display){
         for (let i=0; i<global.r_queue.queue.length; i++){
-            global.r_queue.queue[i].label = 
-                typeof actions.tech[global.r_queue.queue[i].type].title === 'string' ? 
-                actions.tech[global.r_queue.queue[i].type].title : 
+            global.r_queue.queue[i].label =
+                typeof actions.tech[global.r_queue.queue[i].type].title === 'string' ?
+                actions.tech[global.r_queue.queue[i].type].title :
                 actions.tech[global.r_queue.queue[i].type].title();
         }
     }
@@ -8498,7 +8526,7 @@ function sentience(){
         setTraitRank('cannibalize',{ set: 2 });
         setTraitRank('infectious',{ set: 3 });
     }
-    else if (global.race.species === 'tortoisan' && hallowed.active){   
+    else if (global.race.species === 'tortoisan' && hallowed.active){
         setTraitRank('hyper',{ set: 0.25 });
         setTraitRank('swift',{ set: 0.5 });
         setTraitRank('infiltrator',{ set: 1 });
@@ -8604,7 +8632,7 @@ function sentience(){
             genes: 0,
             genus: global.custom.race0.genus,
             traitlist: global.custom.race0.traits,
-            ranks: global.custom.race0?.ranks || {} 
+            ranks: global.custom.race0?.ranks || {}
         });
     }
 
@@ -8623,7 +8651,7 @@ function sentience(){
             genus: global.custom.race1.genus,
             hybrid: global.custom.race1.hybrid,
             traitlist: global.custom.race1.traits,
-            ranks: global.custom.race1?.ranks || {} 
+            ranks: global.custom.race1?.ranks || {}
         });
     }
 
@@ -8642,7 +8670,7 @@ function sentience(){
     global.civic.govern.type = 'anarchy';
     global.civic.govern.rev = 0;
     global.civic.govern.fr = 0;
-    
+
     if (global.genes['queue']){
         global.tech['queue'] = 1;
         global.tech['r_queue'] = 1;
@@ -8667,7 +8695,7 @@ function sentience(){
     Object.keys(global.genes.minor).forEach(function (trait){
         global.race[trait] = trait === 'mastery' ? global.genes.minor[trait] : global.genes.minor[trait] * 2;
     });
-    
+
     let tempMTOrder = [];
     global.settings.mtorder.forEach(function(trait){
        if (global.genes.minor[trait] || trait === 'mastery'){
@@ -8710,7 +8738,7 @@ function sentience(){
         global.civic.foreign.gov0.mil = Math.round(global.civic.foreign.gov0.mil * 1.5);
         global.civic.foreign.gov1.mil = Math.round(global.civic.foreign.gov1.mil * 1.4);
         global.civic.foreign.gov2.mil = Math.round(global.civic.foreign.gov2.mil * 1.25);
-    
+
         global.civic.foreign['gov3'] = {
             unrest: 0,
             hstl: Math.floor(seededRandom(20,40)),
@@ -8821,7 +8849,7 @@ function sentience(){
             global.race['fox_color'] = 'red';
         }
     }
-    
+
     calcPillar(true);
 
     if (global.blood['aware']){
@@ -8859,7 +8887,7 @@ function sentience(){
     if (global.race['deconstructor']){
         global.resource.Nanite.display = true;
         global.city['nanite_factory'] = { count: 1,
-            Lumber: 0, Chrysotile: 0, Stone: 0, Crystal: 0, 
+            Lumber: 0, Chrysotile: 0, Stone: 0, Crystal: 0,
             Furs: 0, Copper: 0, Iron: 0, Aluminium: 0,
             Cement: 0, Coal: 0, Oil: 0, Uranium: 0,
             Steel: 0, Titanium: 0, Alloy: 0, Polymer: 0,
@@ -8997,7 +9025,7 @@ function simulation(){
             global.race.ascended = false;
             global.race.gods = 'none';
             global.race.old_gods = 'none';
-            
+
             ['Plasmid','AntiPlasmid','Phage','Dark','Harmony','AICore','Artifact','Blood_Stone'].forEach(function (res){
                 global.prestige[res] = { count: Number(global.race.simConfig[res]) };
             });
@@ -9014,7 +9042,7 @@ function exitSim(){
         global.pillars = deepClone(global.sim.pillars);
         global.race = deepClone(global.sim.race);
         delete global['sim'];
-        
+
         global.race.species = 'protoplasm';
         delete global.race['simulation'];
 
@@ -9079,7 +9107,8 @@ function aiStart(){
         global.resource.Stone.display = true;
         global.resource.Furs.display = true;
         global.resource.Copper.display = true;
-        global.resource.Iron.display = true;
+        if (!global.race['iron_allergy'])
+            global.resource.Iron.display = true;
         global.resource.Aluminium.display = true;
         global.resource.Coal.display = true;
         global.resource.Oil.display = true;
@@ -9141,8 +9170,12 @@ function aiStart(){
 
         initStruct(actions.city.factory);
         initStruct(actions.city.foundry);
-        initStruct(actions.city.smelter); addSmelter(1, 'Iron');
-        initStruct(actions.city.oil_power); global.city.oil_power.count = 1; global.city.oil_power.on = 1; 
+        initStruct(actions.city.smelter);
+        if (!global.race['iron_allergy'])
+            addSmelter(1, 'Iron');
+        else
+            addSmelter(1, 'Copper');
+        initStruct(actions.city.oil_power); global.city.oil_power.count = 1; global.city.oil_power.on = 1;
         initStruct(actions.city.coal_power);
         initStruct(actions.city.transmitter); global.city.transmitter.count = 1; global.city.transmitter.on = 1;
         initStruct(actions.city.mine); global.city.mine.count = 1;
@@ -9275,7 +9308,8 @@ function cataclysm(){
         global.resource.Stone.display = true;
         global.resource.Furs.display = true;
         global.resource.Copper.display = true;
-        global.resource.Iron.display = true;
+        if (!global.race['iron_allergy'])
+            global.resource.Iron.display = true;
         global.resource.Aluminium.display = true;
         global.resource.Coal.display = true;
         global.resource.Oil.display = true;
@@ -9329,10 +9363,16 @@ function cataclysm(){
         global.resource.Stone.amount = 90000;
         global.resource.Furs.max = 40000;
         global.resource.Furs.amount = 40000;
-        global.resource.Copper.max = 75000;
-        global.resource.Copper.amount = 75000;
-        global.resource.Iron.max = 75000;
-        global.resource.Iron.amount = 75000;
+        if (!global.race['iron_allergy']) {
+            global.resource.Copper.max = 75000;
+            global.resource.Copper.amount = 75000;
+            global.resource.Iron.max = 75000;
+            global.resource.Iron.amount = 75000;
+        }
+        else {
+            global.resource.Copper.max = 150000;
+            global.resource.Copper.amount = 150000;
+        }
         global.resource.Steel.max = 75000;
         global.resource.Steel.amount = 75000;
         global.resource.Aluminium.max = 75000;
@@ -9387,7 +9427,12 @@ function cataclysm(){
         }
         initStruct(actions.city.factory);
         initStruct(actions.city.foundry);
-        initStruct(actions.city.smelter); addSmelter(1, 'Iron'); addSmelter(1, 'Steel');
+        initStruct(actions.city.smelter);
+        if (!global.race['iron_allergy'])
+            addSmelter(1, 'Iron');
+        else
+            addSmelter(1, 'Copper');
+        addSmelter(1, 'Steel');
         initStruct(actions.city.fission_power);
         initStruct(actions.city.oil_power);
         initStruct(actions.city.coal_power);
@@ -9451,7 +9496,11 @@ function cataclysm(){
         initStruct(actions.space.spc_belt.space_station); global.space.space_station.count = 1; global.space.space_station.on = 1; global.space.space_station.s_max = 3;
         initStruct(actions.space.spc_belt.iridium_ship); global.space.iridium_ship.count = 1; global.space.iridium_ship.on = 1;
         initStruct(actions.space.spc_belt.elerium_ship);
-        initStruct(actions.space.spc_belt.iron_ship); global.space.iron_ship.count = 1; global.space.iron_ship.on = 1;
+        if (!global.race['iron_allergy']) {
+            initStruct(actions.space.spc_belt.iron_ship);
+            global.space.iron_ship.count = 1;
+            global.space.iron_ship.on = 1;
+        }
         initStruct(actions.space.spc_dwarf.elerium_contain);
 
         global.civic['garrison'] = {

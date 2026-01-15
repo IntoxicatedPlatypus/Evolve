@@ -287,12 +287,22 @@ function loadSmelter(parent,bind){
         let smeltTypes = $(`<div class="fuels"></div>`);
         smelt.append(smeltTypes);
 
-        let iron = $(`<span :aria-label="mLabel('iron') + ariaProd('Iron')" class="current iron">${global.resource.Iron.name} {{ s.Iron }}</span>`);
-        let ironSub = $(`<span role="button" class="sub" @click="subMetal('Iron')" aria-label="Smelt less iron"><span>&laquo;</span></span>`);
-        let ironAdd = $(`<span role="button" class="add" @click="addMetal('Iron')" aria-label="Smelt more iron"><span>&raquo;</span></span>`);
-        smeltTypes.append(ironSub);
-        smeltTypes.append(iron);
-        smeltTypes.append(ironAdd);
+        if (global.race['iron_allergy']){
+            let copper = $(`<span :aria-label="mLabel('copper') + ariaProd('Copper')" class="current copper">${global.resource.Copper.name} {{ s.Copper }}</span>`);
+            let copperSub = $(`<span role="button" class="sub" @click="subMetal('Copper')" aria-label="Smelt less copper"><span>&laquo;</span></span>`);
+            let copperAdd = $(`<span role="button" class="add" @click="addMetal('Copper')" aria-label="Smelt more copper"><span>&raquo;</span></span>`);
+            smeltTypes.append(copperSub);
+            smeltTypes.append(copper);
+            smeltTypes.append(copperAdd);
+        }
+        else {
+            let iron = $(`<span :aria-label="mLabel('iron') + ariaProd('Iron')" class="current iron">${global.resource.Iron.name} {{ s.Iron }}</span>`);
+            let ironSub = $(`<span role="button" class="sub" @click="subMetal('Iron')" aria-label="Smelt less iron"><span>&laquo;</span></span>`);
+            let ironAdd = $(`<span role="button" class="add" @click="addMetal('Iron')" aria-label="Smelt more iron"><span>&raquo;</span></span>`);
+            smeltTypes.append(ironSub);
+            smeltTypes.append(iron);
+            smeltTypes.append(ironAdd);
+        }
 
         if (global.resource.Steel.display && global.tech.smelting >= 2 && !global.race['steelen']){
             let steel = $(`<span :aria-label="mLabel('steel') + ariaProd('Steel')" class="current steel">${global.resource.Steel.name} {{ s.Steel }}</span>`);
@@ -333,7 +343,10 @@ function loadSmelter(parent,bind){
                     }
                     else if (total < global.city.smelter.cap){
                         global.city.smelter[type]++;
-                        global.city.smelter.Iron++;
+                        if (global.race['iron_allergy'])
+                            global.city.smelter.Copper++;
+                        else
+                            global.city.smelter.Iron++;
                     }
                     else if (total - global.city.smelter[type] > 0){
                         if (type !== 'Wood' && global.city.smelter.Wood > 0){
@@ -367,9 +380,12 @@ function loadSmelter(parent,bind){
                             global.city.smelter.Oil++;
                         }
                         let total = global.city.smelter.Wood + global.city.smelter.Coal + global.city.smelter.Oil + global.city.smelter.Star + global.city.smelter.Inferno;
-                        let used = global.city.smelter.Iron + global.city.smelter.Steel + global.city.smelter.Iridium;
+                        let used = global.city.smelter.Copper + global.city.smelter.Iron + global.city.smelter.Steel + global.city.smelter.Iridium;
                         if (used > total){
-                            if (global.city.smelter.Iron > 0){
+                            if (global.city.smelter.Copper > 0){
+                                global.city.smelter.Copper--;
+                            }
+                            else if (global.city.smelter.Iron > 0){
                                 global.city.smelter.Iron--;
                             }
                             else if (global.city.smelter.Steel > 0) {
@@ -392,7 +408,11 @@ function loadSmelter(parent,bind){
                 let keyMult = keyMultiplier();
                 for (let i=0; i<keyMult; i++){
                     let count = global.city.smelter.Wood + global.city.smelter.Coal + global.city.smelter.Oil + global.city.smelter.Star + global.city.smelter.Inferno;
-                    if (global.city.smelter.Iron + global.city.smelter.Steel + global.city.smelter.Iridium < count){
+                    if (global.city.smelter.Copper + global.city.smelter.Iron + global.city.smelter.Steel + global.city.smelter.Iridium < count){
+                        global.city.smelter[m]++;
+                    }
+                    else if (global.city.smelter.Copper > 0 && m !== 'Copper'){
+                        global.city.smelter.Copper--;
                         global.city.smelter[m]++;
                     }
                     else if (global.city.smelter.Iron > 0 && m !== 'Iron'){
@@ -441,13 +461,13 @@ function loadSmelter(parent,bind){
                 return global.city.smelter.Wood + global.city.smelter.Coal + global.city.smelter.Oil + global.city.smelter.Star + global.city.smelter.Inferno;
             },
             son(c){
-                return global.city.smelter.Iron + global.city.smelter.Steel + global.city.smelter.Iridium;
+                return global.city.smelter.Copper + global.city.smelter.Iron + global.city.smelter.Steel + global.city.smelter.Iridium;
             },
             diffSize(value){
                 return value > 0 ? `+${sizeApproximation(value,2)}` : sizeApproximation(value,2);
             },
             spook(v){
-                if (bind && (((global.race['kindling_kindred'] || global.race['smoldering']) && (global.city.smelter.Steel === 6 || global.city.smelter.Iron === 6)) || global.city.smelter.Wood === 6) && global.city.smelter.Coal === 6 && global.city.smelter.Oil === 6){
+                if (bind && (((global.race['kindling_kindred'] || global.race['smoldering']) && (global.city.smelter.Steel === 6 || global.city.smelter.Iron === 6 || global.city.smelter.Copper === 6)) || global.city.smelter.Wood === 6) && global.city.smelter.Coal === 6 && global.city.smelter.Oil === 6){
                     let trick = trickOrTreat(3,12,true);
                     if (trick.length > 0){
                         return trick;
@@ -456,7 +476,7 @@ function loadSmelter(parent,bind){
                 return v;
             },
             altspook(v){
-                if (bind && global.race['forge'] && global.city.smelter.Steel === 6 && global.city.smelter.Iron === 6){
+                if (bind && global.race['forge'] && global.city.smelter.Steel === 6 && (global.city.smelter.Iron === 6 || global.city.smelter.Copper === 6)){
                     let trick = trickOrTreat(3,12,true);
                     if (trick.length > 0){
                         return trick;
@@ -524,7 +544,10 @@ function loadSmelter(parent,bind){
             if (global.race['pyrophobia']){
                 boost *= 0.9;
             }
-            return loc('modal_smelter_iron',[+(boost).toFixed(3),global.resource.Iron.name]);
+            if (global.race['iron_allergy'])
+                return loc('modal_smelter_iron',[+(boost).toFixed(3),global.resource.Copper.name]);
+            else
+                return loc('modal_smelter_iron',[+(boost).toFixed(3),global.resource.Iron.name]);
         }
     }
 
@@ -540,7 +563,16 @@ function loadSmelter(parent,bind){
 
     if ((global.resource.Steel.display && global.tech.smelting >= 2 && !global.race['steelen']) || (global.resource.Iridium.display && irid_smelt)){
         let id = parent.hasClass('modalBody') ? `mSmelterMats` : `smelterMats`;
-        ['iron','steel','iridium'].forEach(function(mat){
+
+        let smeltMats = [];
+        if (global.race['iron_allergy'])
+            smeltMats.push('copper');
+        else
+            smeltMats.push('iron');
+        smeltMats.push('steel');
+        smeltMats.push('iridium');
+
+        smeltMats.forEach(function(mat){
             if (mat === 'steel' && (!global.resource.Steel.display || global.race['steelen'])){
                 return;
             }
@@ -562,8 +594,11 @@ export function smelterUnlocked(){
 }
 
 export function addSmelter(num=1, product="Iron", fuel="Oil"){
+    if (global.race['iron_allergy'] && product === "Iron")
+        product = "Copper";
+
     global.city.smelter.cap += num;
-    global.city.smelter[product] += num; // ["Iron", "Steel", "Iridium"]
+    global.city.smelter[product] += num; // ["Copper", "Iron", "Steel", "Iridium"]
     global.city.smelter[fuel] += num; // ["Wood", "Coal", "Oil", "Star", "Inferno"]
     if (fuel === 'star') {
         global.city.smelter.StarCap += num;
@@ -1457,9 +1492,16 @@ function loadTMine(parent,bind){
 }
 
 function loadMiningShip(parent,bind){
-    parent.append($(`<div>${loc('tau_roid_mining_ship_ratio',[global.resource.Iron.name,global.resource.Aluminium.name])}</div>`));
-    let common = $(`<div class="sliderbar thin"><span class="sub" role="button" @click="sub('common')" aria-label="Increase Iron Production">&laquo;</span><b-slider v-model="common" format="percent"></b-slider><span class="add" role="button" @click="add('common')" aria-label="Increase Aluminium Production">&raquo;</span></div>`);
-    parent.append(common);
+    if (global.race['iron_allergy']) {
+        parent.append($(`<div>${loc('tau_roid_mining_ship_ratio', [global.resource.Copper.name, global.resource.Aluminium.name])}</div>`));
+        let common = $(`<div class="sliderbar thin"><span class="sub" role="button" @click="sub('common')" aria-label="Increase Copper Production">&laquo;</span><b-slider v-model="common" format="percent"></b-slider><span class="add" role="button" @click="add('common')" aria-label="Increase Aluminium Production">&raquo;</span></div>`);
+        parent.append(common);
+    }
+    else {
+        parent.append($(`<div>${loc('tau_roid_mining_ship_ratio', [global.resource.Iron.name, global.resource.Aluminium.name])}</div>`));
+        let common = $(`<div class="sliderbar thin"><span class="sub" role="button" @click="sub('common')" aria-label="Increase Iron Production">&laquo;</span><b-slider v-model="common" format="percent"></b-slider><span class="add" role="button" @click="add('common')" aria-label="Increase Aluminium Production">&raquo;</span></div>`);
+        parent.append(common);
+    }
 
     parent.append($(`<div>${loc('tau_roid_mining_ship_ratio',[global.resource.Iridium.name,global.resource.Neutronium.name])}</div>`));
     let uncommon = $(`<div class="sliderbar thin"><span class="sub" role="button" @click="sub('uncommon')" aria-label="Increase Iridium Production">&laquo;</span><b-slider v-model="uncommon" format="percent"></b-slider><span class="add" role="button" @click="add('uncommon')" aria-label="Increase Neutronium Production">&raquo;</span></div>`);

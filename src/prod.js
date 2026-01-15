@@ -96,6 +96,9 @@ export function production(id,val,wiki){
                 case 'copper':
                 {
                     let base = highPopAdjust(0.25);
+                    if (global.race['iron_allergy'])
+                        base *= 2;
+
                     let gov = govRelationFactor(3);
                     return {
                         b: base,
@@ -400,7 +403,10 @@ export function production(id,val,wiki){
                 }
                 case 'copper':
                 {
-                    return 1.191 * boost;
+                    if (global.race['iron_allergy'])
+                        return 2.568 * boost;
+                    else
+                        return 1.191 * boost;
                 }
                 case 'iron':
                 {
@@ -446,6 +452,7 @@ export function production(id,val,wiki){
         case 'mining_ship_ore':
         {
             switch (val){
+                case 'copper':
                 case 'iron':
                 {
                     return global.tech['isolation'] ? 2.22 : 1.85;

@@ -391,7 +391,7 @@ const techs = {
     },
     steel_beams: {
         id: 'tech-steel_beams',
-        title: loc('tech_steel_beams'),
+        title: global.race['iron_allergy'] ? loc('tech_steel_beams_allergy') : loc('tech_steel_beams'),
         desc: loc('tech_housing_cost'),
         category: 'housing',
         era: 'discovery',
@@ -405,7 +405,7 @@ const techs = {
         effect(){
             let label = housingLabel('small');
             let cLabel = housingLabel('medium');
-            return loc('tech_steel_beams_effect',[label,cLabel]);
+            return global.race['iron_allergy'] ? loc('tech_steel_beams_allergy_effect',[label,cLabel]) : loc('tech_steel_beams_effect',[label,cLabel]);
         },
         action(){
             if (payCosts($(this)[0])){
@@ -865,6 +865,7 @@ const techs = {
         era: 'civilized',
         reqs: { foraging: 2, mining: 3 },
         trait: ['forager'],
+        not_trait: ['iron_allergy'],
         grant: ['foraging',3],
         cost: {
             Knowledge(){ return global.city.ptrait.includes('unstable') ? 1650 : 3300; },
@@ -880,16 +881,38 @@ const techs = {
     },
     steel_spear: {
         id: 'tech-steel_spear',
-        title: loc('tech_steel_spear'),
-        desc: loc('tech_steel_spear_desc'),
+        title: global.race['iron_allergy'] ? loc('tech_steel_spear_allergy') : loc('tech_steel_spear'),
+        desc: global.race['iron_allergy'] ? loc('tech_steel_spear_allergy_desc') : loc('tech_steel_spear_desc'),
         category: 'foraging',
         era: 'civilized',
         reqs: { foraging: 3, smelting: 2 },
         trait: ['forager'],
+        not_trait: ['iron_allergy'],
         grant: ['foraging',4],
         cost: {
             Knowledge(){ return 10500; },
             Iron(){ return 750; }
+        },
+        effect: loc('tech_bronze_spear_effect'),
+        action(){
+            if (payCosts($(this)[0])){
+                return true;
+            }
+            return false;
+        }
+    },
+    steel_spear_alt: {
+        id: 'tech-steel_spear_alt',
+        title: loc('tech_steel_spear'),
+        desc: loc('tech_steel_spear_desc'),
+        category: 'foraging',
+        era: 'civilized',
+        reqs: { foraging: 2, smelting: 2 },
+        trait: ['forager', 'iron_allergy'],
+        grant: ['foraging',4],
+        cost: {
+            Knowledge(){ return 10500; },
+            Steel(){ return 750; }
         },
         effect: loc('tech_bronze_spear_effect'),
         action(){
@@ -1558,10 +1581,13 @@ const techs = {
             }
             return false;
         },
-        post(){
+        post() {
             let num_forge_on = p_on['stellar_forge'];
             let num_new_smelters = num_forge_on * actions.interstellar.int_neutron.stellar_forge.smelting();
-            addSmelter(num_new_smelters, 'Iron', 'Star');
+            if (global.race['iron_allergy'])
+                addSmelter(num_new_smelters, 'Copper', 'Star');
+            else
+                addSmelter(num_new_smelters, 'Iron', 'Star');
             defineIndustry();
         }
     },
@@ -2056,8 +2082,8 @@ const techs = {
     },
     steel: {
         id: 'tech-steel',
-        title: loc('tech_steel'),
-        desc: loc('tech_steel_desc'),
+        title: global.race['iron_allergy'] ? loc('tech_steel_allergy') : loc('tech_steel'),
+        desc: global.race['iron_allergy'] ? loc('tech_steel_allergy_desc') : loc('tech_steel_desc'),
         category: 'mining',
         era: 'civilized',
         reqs: { smelting: 1, mining: 4 },
@@ -2069,7 +2095,7 @@ const techs = {
             Knowledge(){ return 4950; },
             Steel(){ return 25; }
         },
-        effect: loc('tech_steel_effect'),
+        effect: global.race['iron_allergy'] ? loc('tech_steel_allergy_effect') : loc('tech_steel_effect'),
         action(){
             if (payCosts($(this)[0])){
                 global.resource.Steel.display = true;
@@ -2094,7 +2120,7 @@ const techs = {
             Knowledge(){ return 13500; },
             Coal(){ return 2000; }
         },
-        effect: loc('tech_blast_furnace_effect'),
+        effect: global.race['iron_allergy'] ? loc('tech_blast_furnace_allergy_effect') : loc('tech_blast_furnace_effect'),
         action(){
             if (payCosts($(this)[0])){
                 return true;
@@ -2295,6 +2321,7 @@ const techs = {
         category: 'mining',
         era: 'civilized',
         reqs: { mining: 2 },
+        not_trait: ['iron_allergy'],
         grant: ['mining',3],
         cost: {
             Knowledge(){ return global.city.ptrait.includes('unstable') ? 500 : 2500; }
@@ -2303,6 +2330,33 @@ const techs = {
         action(){
             if (payCosts($(this)[0])){
                 global.resource.Iron.display = true;
+                if (global.city['foundry'] && global.city['foundry'].count > 0){
+                    global.resource.Wrought_Iron.display = true;
+                    loadFoundry();
+                }
+                return true;
+            }
+            return false;
+        },
+        post(){
+            renderPsychicPowers();
+        }
+    },
+    iron_mining_alt: {
+        id: 'tech-iron_mining_alt',
+        title: loc('tech_iron_mining_alt'),
+        desc: loc('tech_iron_mining_alt_desc'),
+        category: 'mining',
+        era: 'civilized',
+        reqs: { mining: 2 },
+        trait: ['iron_allergy'],
+        grant: ['mining',3],
+        cost: {
+            Knowledge(){ return global.city.ptrait.includes('unstable') ? 500 : 2500; }
+        },
+        effect: loc('tech_iron_mining_alt_effect'),
+        action(){
+            if (payCosts($(this)[0])){
                 if (global.city['foundry'] && global.city['foundry'].count > 0){
                     global.resource.Wrought_Iron.display = true;
                     loadFoundry();
@@ -6544,7 +6598,7 @@ const techs = {
         reqs: { reclaimer: 2, mining: 3 },
         grant: ['reclaimer',3],
         trait: ['evil'],
-        not_trait: ['living_tool'],
+        not_trait: ['living_tool', 'iron_allergy'],
         condition(){
             return global.race['kindling_kindred'] || global.race['smoldering'] ? false : global.race.species === 'wendigo' ? true : global.race['soul_eater'] ? false : true;
         },
@@ -6569,6 +6623,31 @@ const techs = {
         reqs: { reclaimer: 3, smelting: 2 },
         grant: ['reclaimer',4],
         trait: ['evil'],
+        not_trait: ['living_tool', 'iron_allergy'],
+        condition(){
+            return global.race['kindling_kindred'] || global.race['smoldering'] ? false : global.race.species === 'wendigo' ? true : global.race['soul_eater'] ? false : true;
+        },
+        cost: {
+            Knowledge(){ return 9000; },
+            Steel(){ return 250; }
+        },
+        effect: loc('tech_steel_shovel_effect'),
+        action(){
+            if (payCosts($(this)[0])){
+                return true;
+            }
+            return false;
+        }
+    },
+    steel_shovel_alt: {
+        id: 'tech-steel_shovel_alt',
+        title: loc('tech_steel_shovel'),
+        desc: loc('tech_steel_shovel'),
+        category: 'reclaimer',
+        era: 'discovery',
+        reqs: { reclaimer: 2, smelting: 2 },
+        grant: ['reclaimer',4],
+        trait: ['evil', 'iron_allergy'],
         not_trait: ['living_tool'],
         condition(){
             return global.race['kindling_kindred'] || global.race['smoldering'] ? false : global.race.species === 'wendigo' ? true : global.race['soul_eater'] ? false : true;
@@ -6782,7 +6861,7 @@ const techs = {
         category: 'lumber_gathering',
         era: 'civilized',
         reqs: { axe: 2, mining: 3 },
-        not_trait: ['living_tool'],
+        not_trait: ['living_tool', 'iron_allergy'],
         grant: ['axe',3],
         cost: {
             Knowledge(){ return global.city.ptrait.includes('unstable') ? 1350 : 2700; },
@@ -6803,6 +6882,28 @@ const techs = {
         category: 'lumber_gathering',
         era: 'discovery',
         reqs: { axe: 3, smelting: 2 },
+        not_trait: ['living_tool', 'iron_allergy'],
+        grant: ['axe',4],
+        cost: {
+            Knowledge(){ return 9000; },
+            Steel(){ return 250; }
+        },
+        effect: loc('tech_steel_axes_effect'),
+        action(){
+            if (payCosts($(this)[0])){
+                return true;
+            }
+            return false;
+        }
+    },
+    steel_axes_alt: {
+        id: 'tech-steel_axes_alt',
+        title: loc('tech_steel_axes'),
+        desc: loc('tech_steel_axes_desc'),
+        category: 'lumber_gathering',
+        era: 'discovery',
+        reqs: { axe: 2, smelting: 2 },
+        trait: ['iron_allergy'],
         not_trait: ['living_tool'],
         grant: ['axe',4],
         cost: {
@@ -6889,7 +6990,7 @@ const techs = {
         category: 'stone_gathering',
         era: 'civilized',
         reqs: { hammer: 1, mining: 3 },
-        not_trait: ['cataclysm','sappy','living_tool'],
+        not_trait: ['cataclysm','sappy','living_tool', 'iron_allergy'],
         grant: ['hammer',2],
         cost: {
             Knowledge(){ return global.city.ptrait.includes('unstable') ? 1350 : 2700; },
@@ -6910,6 +7011,28 @@ const techs = {
         category: 'stone_gathering',
         era: 'discovery',
         reqs: { hammer: 2, smelting: 2 },
+        not_trait: ['cataclysm','sappy','living_tool', 'iron_allergy'],
+        grant: ['hammer',3],
+        cost: {
+            Knowledge(){ return 7200; },
+            Steel(){ return 250; }
+        },
+        effect: loc('tech_steel_sledgehammer_effect'),
+        action(){
+            if (payCosts($(this)[0])){
+                return true;
+            }
+            return false;
+        }
+    },
+    steel_sledgehammer_alt: {
+        id: 'tech-steel_sledgehammer_alt',
+        title: loc('tech_steel_sledgehammer'),
+        desc: loc('tech_steel_sledgehammer_desc'),
+        category: 'stone_gathering',
+        era: 'discovery',
+        reqs: { hammer: 1, smelting: 2 },
+        trait: ['iron_allergy'],
         not_trait: ['cataclysm','sappy','living_tool'],
         grant: ['hammer',3],
         cost: {
@@ -6973,7 +7096,7 @@ const techs = {
         category: 'mining',
         era: 'civilized',
         reqs: { pickaxe: 1, mining: 3 },
-        not_trait: ['cataclysm','living_tool','tusk'],
+        not_trait: ['cataclysm','living_tool','tusk', 'iron_allergy'],
         grant: ['pickaxe',2],
         cost: {
             Knowledge(){ return global.city.ptrait.includes('unstable') ? 1600 : 3200; },
@@ -6994,6 +7117,28 @@ const techs = {
         category: 'mining',
         era: 'discovery',
         reqs: { pickaxe: 2, smelting: 2 },
+        not_trait: ['living_tool','tusk', 'iron_allergy'],
+        grant: ['pickaxe',3],
+        cost: {
+            Knowledge(){ return 9000; },
+            Steel(){ return 250; }
+        },
+        effect: loc('tech_steel_pickaxe_effect'),
+        action(){
+            if (payCosts($(this)[0])){
+                return true;
+            }
+            return false;
+        }
+    },
+    steel_pickaxe_alt: {
+        id: 'tech-steel_pickaxe_alt',
+        title: loc('tech_steel_pickaxe'),
+        desc: loc('tech_steel_pickaxe_desc'),
+        category: 'mining',
+        era: 'discovery',
+        reqs: { pickaxe: 1, smelting: 2 },
+        trait: ['iron_allergy'],
         not_trait: ['living_tool','tusk'],
         grant: ['pickaxe',3],
         cost: {
@@ -7122,7 +7267,7 @@ const techs = {
         category: 'agriculture',
         era: 'civilized',
         reqs: { hoe: 1, mining: 3, agriculture: 1 },
-        not_trait: ['living_tool'],
+        not_trait: ['living_tool', 'iron_allergy'],
         grant: ['hoe',2],
         cost: {
             Knowledge(){ return global.city.ptrait.includes('unstable') ? 1800 : 3600; },
@@ -7143,6 +7288,28 @@ const techs = {
         category: 'agriculture',
         era: 'discovery',
         reqs: { hoe: 2, smelting: 2, agriculture: 1 },
+        not_trait: ['living_tool', 'iron_allergy'],
+        grant: ['hoe',3],
+        cost: {
+            Knowledge(){ return 12600; },
+            Steel(){ return 500; }
+        },
+        effect: loc('tech_steel_hoe_effect'),
+        action(){
+            if (payCosts($(this)[0])){
+                return true;
+            }
+            return false;
+        }
+    },
+    steel_hoe_alt: {
+        id: 'tech-steel_hoe_alt',
+        title: loc('tech_steel_hoe'),
+        desc: loc('tech_steel_hoe_desc'),
+        category: 'agriculture',
+        era: 'discovery',
+        reqs: { hoe: 1, smelting: 2, agriculture: 1 },
+        trait: ['iron_allergy'],
         not_trait: ['living_tool'],
         grant: ['hoe',3],
         cost: {
@@ -9408,7 +9575,8 @@ const techs = {
             if (payCosts($(this)[0])){
                 initStruct(actions.space.spc_belt.space_station);
                 initStruct(actions.space.spc_belt.iridium_ship);
-                initStruct(actions.space.spc_belt.iron_ship);
+                if (!global.race['iron_allergy'])
+                    initStruct(actions.space.spc_belt.iron_ship);
                 return true;
             }
             return false;
@@ -15707,8 +15875,7 @@ export function techList(path){
             if (techPath[path].includes(techs[t].era) || techs[t].hasOwnProperty('path')){
                 if (!techs[t].hasOwnProperty('path') || (techs[t].hasOwnProperty('path') && techs[t].path.includes(path))){
                     techList[t] = techs[t];
-                }
-            }
+                }            }
         });
         return techList;
     }

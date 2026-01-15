@@ -4007,8 +4007,11 @@ const interstellarProjects = {
                     if (powerOnNewStruct($(this)[0])){
                         global.civic.craftsman.max += jobScale(2);
                         let num_smelters = $(this)[0].smelting();
-                        if (num_smelters > 0){
-                            addSmelter(num_smelters, 'Iron', 'Star');
+                        if (num_smelters > 0) {
+                            if (global.race['iron_allergy'])
+                                addSmelter(num_smelters, 'Copper', 'Star');
+                            else
+                                addSmelter(num_smelters, 'Iron', 'Star');
                         }
                     }
                     return true;
@@ -7259,10 +7262,15 @@ function house_adjust(res){
     return res;
 }
 
-export function iron_adjust(res,wiki){
-    let num_iron_ship_on = wiki ? (global.space?.iron_ship?.on ?? 0) : support_on['iron_ship'];
-    if (global.tech['solar'] && global.tech['solar'] >= 5 && num_iron_ship_on){
-        res *= 0.95 ** num_iron_ship_on;
+export function iron_adjust(res,wiki) {
+    let num_ship_on = 0;
+    if (global.race['iron_allergy'])
+        num_ship_on = wiki ? (global.space?.iron_ship?.on ?? 0) : support_on['iron_ship'];
+    else
+        num_ship_on = wiki ? (global.space?.iridium_ship?.on ?? 0) : support_on['iridium_ship'];
+
+    if (global.tech['solar'] && global.tech['solar'] >= 5 && num_ship_on) {
+        res *= 0.95 ** num_ship_on;
     }
     return res;
 }

@@ -203,6 +203,9 @@ export function craftCost(manual=false){
             }
         });
     }
+    if (global.race['iron_allergy']){
+        costs.Wrought_Iron[0].r = 'Copper';
+    }
     return costs;
 }
 
