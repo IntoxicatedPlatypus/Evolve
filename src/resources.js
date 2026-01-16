@@ -205,6 +205,8 @@ export function craftCost(manual=false){
     }
     if (global.race['iron_allergy']){
         costs.Wrought_Iron[0].r = 'Copper';
+        costs.Scarletite[0].r = 'Steel';
+        costs.Thermite[0].r = 'Copper';
     }
     return costs;
 }
@@ -1193,6 +1195,11 @@ export function setResourceName(name){
                 break;
         }
     }
+
+    if (global.race['iron_allergy'] && name === "Steel") {
+        global.resource.Steel.name = loc('resource_Brass_name');
+    }
+
 
     /* Too many hard coded string references to cement, maybe some other day
     if (global.city.biome === 'ashland'){

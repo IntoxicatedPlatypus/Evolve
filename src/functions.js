@@ -2001,7 +2001,15 @@ function kindlingAdjust(costs, offset, wiki){
 function allergyAdjust(costs, offset, wiki){
     if ((global.race['iron_allergy']) && (costs['Iron'] || costs['Wrought_Iron'])){
         const newCosts = {};
+
         let adjustRate = 1 + (traits.iron_allergy.vars()[0] / 100);
+        let steelCostRatio = 0;
+        let copperCostRatio = 3;
+        if (global.tech.smelting && global.tech.smelting >= 2 && global.city.smelter.count >= 1) {
+            steelCostRatio = traits.iron_allergy.vars()[1] / 100;
+            copperCostRatio = 1 - steelCostRatio;
+        }
+
         Object.keys(costs).forEach(function (res){
             if (res === 'Copper' || res === 'Steel') {
                 if (!newCosts[res])
@@ -2014,29 +2022,21 @@ function allergyAdjust(costs, offset, wiki){
                 }
             }
             else if (res === 'Iron') {
-                let steelCostRatio = 0;
-                let copperCostRatio = 3;
-
-                if (global.resource.Steel.visible){
-                    steelCostRatio = global.traits.iron_allergy.vars()[1] / 100;
-                    copperCostRatio = 1 - steelCostRatio;
-                }
-
                 if (!newCosts['Copper'])
-                    newCosts['Copper'] = function(){ return costs[res](offset, wiki) * copperCostRatio; }
+                    newCosts['Copper'] = function(){ return Math.round(costs[res](offset, wiki) * copperCostRatio); }
                 else {
                     let prev = newCosts['Copper']();
                     newCosts['Copper'] = function () {
-                        return prev + costs[res](offset, wiki) * copperCostRatio;
+                        return Math.round(prev + costs[res](offset, wiki) * copperCostRatio);
                     }
                 }
 
                 if (!newCosts['Steel'])
-                    newCosts['Steel'] = function(){ return costs[res](offset, wiki) * steelCostRatio; }
+                    newCosts['Steel'] = function(){ return Math.round(costs[res](offset, wiki) * steelCostRatio); }
                 else {
                     let prev = newCosts['Steel']();
                     newCosts['Steel'] = function () {
-                        return prev + costs[res](offset, wiki) * steelCostRatio;
+                        return Math.round(prev + costs[res](offset, wiki) * steelCostRatio);
                     }
                 }
             }

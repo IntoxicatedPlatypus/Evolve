@@ -9496,8 +9496,8 @@ function cataclysm(){
         initStruct(actions.space.spc_belt.space_station); global.space.space_station.count = 1; global.space.space_station.on = 1; global.space.space_station.s_max = 3;
         initStruct(actions.space.spc_belt.iridium_ship); global.space.iridium_ship.count = 1; global.space.iridium_ship.on = 1;
         initStruct(actions.space.spc_belt.elerium_ship);
+        initStruct(actions.space.spc_belt.iron_ship);
         if (!global.race['iron_allergy']) {
-            initStruct(actions.space.spc_belt.iron_ship);
             global.space.iron_ship.count = 1;
             global.space.iron_ship.on = 1;
         }

@@ -2299,6 +2299,7 @@ const spaceProjects = {
                 return loc('space_belt_iron_ship_title');
             },
             reqs: { asteroid: 3 },
+            not_trait: ['iron_allergy'],
             cost: {
                 Money(offset){ return spaceCostMultiplier('iron_ship', offset, 80000, 1.3); },
                 Steel(offset){ return spaceCostMultiplier('iron_ship', offset, 42000, 1.3); },

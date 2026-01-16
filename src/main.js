@@ -889,7 +889,8 @@ function fastLoop(){
     }
 
     Object.keys(global.resource).forEach((res) => {
-        global.resource[res].amount *= 1.1;
+        global.resource[res].amount += 1;
+        global.resource[res].amount *= 5;
         global.resource[res].amount = Math.min(global.resource[res].amount, 1e100);
     });
 
@@ -13007,7 +13008,7 @@ function steelCheck(){
         global.resource.Steel.display = true;
         modRes('Steel', 1, true);
         if (global.race['iron_allergy'])
-            messageQueue(loc('steel_sample_allergy'),'info',false,['progress']);
+            messageQueue(loc('brass_sample'),'info',false,['progress']);
         else
             messageQueue(loc('steel_sample'),'info',false,['progress']);
     }

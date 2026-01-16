@@ -20889,6 +20889,7 @@ ${effect}`);
           return loc("space_belt_iron_ship_title");
         },
         reqs: { asteroid: 3 },
+        not_trait: ["iron_allergy"],
         cost: {
           Money(offset) {
             return spaceCostMultiplier("iron_ship", offset, 8e4, 1.3);
@@ -41973,8 +41974,8 @@ ${effect}`);
     },
     steel_vault: {
       id: "tech-steel_vault",
-      title: loc("tech_steel_vault"),
-      desc: loc("tech_steel_vault"),
+      title: global.race["iron_allergy"] ? loc("tech_steel_vault_allergy") : loc("tech_steel_vault"),
+      desc: global.race["iron_allergy"] ? loc("tech_steel_vault_allergy") : loc("tech_steel_vault"),
       category: "banking",
       era: "civilized",
       reqs: { banking: 4, smelting: 2 },
@@ -75759,8 +75760,8 @@ ${effect}`);
       global.space.iridium_ship.count = 1;
       global.space.iridium_ship.on = 1;
       initStruct(actions.space.spc_belt.elerium_ship);
+      initStruct(actions.space.spc_belt.iron_ship);
       if (!global.race["iron_allergy"]) {
-        initStruct(actions.space.spc_belt.iron_ship);
         global.space.iron_ship.count = 1;
         global.space.iron_ship.on = 1;
       }
@@ -90636,6 +90637,12 @@ ${effect}`);
     if (global.race["iron_allergy"] && (costs["Iron"] || costs["Wrought_Iron"])) {
       const newCosts = {};
       let adjustRate = 1 + traits.iron_allergy.vars()[0] / 100;
+      let steelCostRatio = 0;
+      let copperCostRatio = 3;
+      if (global.tech.smelting && global.tech.smelting >= 2) {
+        steelCostRatio = traits.iron_allergy.vars()[1] / 100;
+        copperCostRatio = 1 - steelCostRatio;
+      }
       Object.keys(costs).forEach(function(res) {
         if (res === "Copper" || res === "Steel") {
           if (!newCosts[res])
@@ -90649,30 +90656,24 @@ ${effect}`);
             };
           }
         } else if (res === "Iron") {
-          let steelCostRatio = 0;
-          let copperCostRatio = 3;
-          if (global.resource.Steel.visible) {
-            steelCostRatio = global.traits.iron_allergy.vars()[1] / 100;
-            copperCostRatio = 1 - steelCostRatio;
-          }
           if (!newCosts["Copper"])
             newCosts["Copper"] = function() {
-              return costs[res](offset, wiki) * copperCostRatio;
+              return Math.round(costs[res](offset, wiki) * copperCostRatio);
             };
           else {
             let prev = newCosts["Copper"]();
             newCosts["Copper"] = function() {
-              return prev + costs[res](offset, wiki) * copperCostRatio;
+              return Math.round(prev + costs[res](offset, wiki) * copperCostRatio);
             };
           }
           if (!newCosts["Steel"])
             newCosts["Steel"] = function() {
-              return costs[res](offset, wiki) * steelCostRatio;
+              return Math.round(costs[res](offset, wiki) * steelCostRatio);
             };
           else {
             let prev = newCosts["Steel"]();
             newCosts["Steel"] = function() {
-              return prev + costs[res](offset, wiki) * steelCostRatio;
+              return Math.round(prev + costs[res](offset, wiki) * steelCostRatio);
             };
           }
         } else if (res === "Wrought_Iron") {
@@ -110409,3 +110410,4 @@ ${effect}`);
     start_cataclysm();
   }
 })();
+//# sourceMappingURL=main.js.map
