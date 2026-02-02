@@ -156,7 +156,7 @@ export const job_desc = {
         return desc;
     },
     scavenger: function(servant) {
-        let bonus = scavengerBonus(servant);
+        let bonus = scavengerBonus(servant).toFixed(2);
 
         let desc = loc('job_scavenger_desc',[races[global.race.species].home, bonus]);
         if (global.civic.d_job === 'scavenger' && !servant){
@@ -442,7 +442,7 @@ export function scavengerBonus(servant = false){
         if (global.city.ptrait.includes('trashed')){
             bonus *= planetTraits.trashed.vars()[1];
         }
-        bonus = servantTrait(bonus, 'scavenger');
+        bonus *= servantTrait(global.race.servants.jobs.scavenger ?? 0, 'scavenger');
         return bonus;
     }
 }
