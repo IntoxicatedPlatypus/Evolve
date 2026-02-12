@@ -7086,6 +7086,15 @@ export function cleanAddTrait(trait){
             }
             purgeLumber();
             break;
+        case 'iron_allergy':
+            global.resource.Iron.display = false;
+            releaseResource('Iron');
+            removeFromQueue(['space-iron_ship']);
+            setResourceName('Steel');
+            setResourceName('Wrought_Iron');
+            setPurgatory('space','iron_ship');
+            setPurgatory('tech','space_sourced');
+            break;
         case 'iron_wood':
             if (global.race['smoldering']){
                 break;
@@ -7375,6 +7384,15 @@ export function cleanRemoveTrait(trait,rank){
             checkPurgatory('tech','saw');
             if ((global.tech['axe'] || global.tech['reclaimer']) && !global.race['orbit_decayed']){
                 global.civic.lumberjack.display = true;
+            }
+            break;
+        case 'iron_allergy':
+            checkPurgatory('space','iron_ship');
+            checkPurgatory('tech','space_sourced');
+            setResourceName('Steel');
+            setResourceName('Wrought_Iron');
+            if (global.tech['mining'] && global.tech.mining >= 3) {
+                global.resource.Iron.display = true;
             }
             break;
         case 'iron_wood':

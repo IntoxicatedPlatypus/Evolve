@@ -2002,7 +2002,7 @@ function allergyAdjust(costs, offset, wiki){
     if ((global.race['iron_allergy']) && (costs['Iron'] || costs['Wrought_Iron'])){
         const newCosts = {};
 
-        let adjustRate = 1 + (traits.iron_allergy.vars()[0] / 100);
+        let craftedAdjustRate = 1 + (traits.iron_allergy.vars()[0] / 100);
         let steelCostRatio = 0;
         let copperCostRatio = 3;
         if (global.tech.smelting && global.tech.smelting >= 2 && global.city.smelter.count >= 1) {
@@ -2041,7 +2041,7 @@ function allergyAdjust(costs, offset, wiki){
                 }
             }
             else if (res === 'Wrought_Iron') {
-                newCosts[res] = function(){ return Math.round(costs[res](offset, wiki) * adjustRate) || 0; }
+                newCosts[res] = function(){ return Math.round(costs[res](offset, wiki) * craftedAdjustRate) || 0; }
             }
             else {
                 newCosts[res] = function(){ return costs[res](offset, wiki); }

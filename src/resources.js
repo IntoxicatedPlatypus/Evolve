@@ -1196,8 +1196,11 @@ export function setResourceName(name){
         }
     }
 
-    if (global.race['iron_allergy'] && name === "Steel") {
-        global.resource.Steel.name = loc('resource_Brass_name');
+    if (global.race['iron_allergy']) {
+        if (name === "Steel")
+            global.resource.Steel.name = loc('resource_Brass_name');
+        else if (name === "Wrought_Iron")
+            global.resource.Wrought_Iron.name = loc('resource_Annealed_Copper_name');
     }
 
 
