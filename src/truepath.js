@@ -6794,7 +6794,7 @@ function zBattle(locationName,foes,rounds){
         zMessage(loc('zcombat_foe_destroyed_multiple', [tally.downed.length, regionName(locationName)]), 'success');
     }
     else if (tally.downed.length == 1){
-        zMessage(loc(synd ? 'syndicate_orbit_destroyed' : 'zcombat_foe_destroyed',[foe.name,regionName(locationName)]),'success');
+        zMessage(loc(synd ? 'syndicate_orbit_destroyed' : 'zcombat_foe_destroyed',[tally.downed[0].name,regionName(locationName)]),'success');
     }
     else{ 
         //TBA: syndicate multiple message
@@ -6915,7 +6915,7 @@ function zFleetMove(fleet){
                 if (msg[0].crushed == 0)
                     zMessage(loc('zfleet_landing_multiple',[msg.length, reg, totalInflux.toLocaleString()]),'danger');
                 else
-                    zMessage(loc('zfleet_landing_crushed_multiple',[msg.length, reg, totalInflux.toLocaleString(), totalCrushed.crushed.toLocaleString()]),'danger');
+                    zMessage(loc('zfleet_landing_crushed_multiple',[msg.length, reg, totalInflux.toLocaleString(), totalCrushed.toLocaleString()]),'danger');
             }
             else{
                 if (msg[0].crushed == 0)
